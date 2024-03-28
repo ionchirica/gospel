@@ -197,16 +197,15 @@
       :: Spaces(_, _)
       :: LoopTest(start_t, _end_t, t) (* test *)
       :: Spaces(_, _)
-      :: Other o               (* do *)
-      :: Spaces(_, _)
       :: Spec(start_s, end_s, s)
       :: l
       ->
-       Fmt.pf ppf "%s%t%t%s%t%s" h (print_loop_spec start_s end_s s)
+       Fmt.pf ppf "%s%t%t%s%t"
+         h
+         (print_loop_spec start_s end_s s)
          (print_directive `Open start_t)
          t
-         (print_directive `Close end_s)
-         o;
+         (print_directive `Close end_s);
        print ppf l
 
     | Other o :: Spaces (_, sp) :: Spec (start_p, end_p, s) :: l ->
@@ -290,10 +289,11 @@ rule scan ppf = parse
   | (("while" | "for") (space+ as ws)) as k
     {
       push ();
+
+      Printf.eprintf ("Lexer while [%s]\n") (Lexing.lexeme lexbuf);
       (* FIXME: look into this *)
       let start_pos = Lexing.lexeme_start_p lexbuf in
       let end_pos = Lexing.lexeme_end_p lexbuf in
-
       String.iter (fun c -> if c = '\n' then Lexing.new_line lexbuf) ws;
 
       Queue.push (LoopHead (start_pos, end_pos, k)) queue;
@@ -362,7 +362,8 @@ and gospel ppf start_pos = parse
       Lexing.new_line lexbuf;
       gospel ppf start_pos lexbuf
     }
-  | ("function" | "type" | "predicate" | "axiom" | "val" | "open" | "lemma" | "inductive" ) as k {
+  | ("function" | "type" | "predicate" | "axiom" |
+     "val" | "open" | "lemma" | "inductive" | "iter" ) as k {
       Buffer.add_string buf k;
       comment lexbuf;
       let s = Buffer.contents buf in
@@ -415,38 +416,45 @@ and comment = parse
     }
 
 and loop start_pos = parse
-  | ("do" (space* as ws)) as k "(*@"
-    {
-      (* TODO: add relocation directives *)
+  | blank+ as s {
+      Buffer.add_string buf s;
+      loop start_pos lexbuf
+    }
+  | newline as nl {
+      Printf.eprintf ("Lexer newline [%s]\n") (Lexing.lexeme lexbuf);
+      Buffer.add_string buf nl;
+      Lexing.new_line lexbuf;
+      loop start_pos lexbuf
+    }
+  | "(*@" {
+      Printf.eprintf ("Lexer start spec [%s]\n") (Lexing.lexeme lexbuf);
+      let end_pos = Lexing.lexeme_start_p lexbuf in
       let cond_body = Buffer.contents buf in
-      Buffer.clear buf;
-      let end_pos = Lexing.lexeme_end_p lexbuf in
-      Buffer.add_string buf k;
       let cond = LoopTest (start_pos, end_pos, cond_body) in
+      Buffer.clear buf;
       Queue.push cond queue;
 
-      let spec_start_pos = ref (Lexing.lexeme_start_p lexbuf) in
-      let increment_line (pos : Lexing.position) : Lexing.position = { pos with pos_lnum = pos.pos_lnum + 1 } in
-      String.iter (fun c -> if c = '\n' then (Lexing.new_line lexbuf; spec_start_pos := increment_line !spec_start_pos; ())) ws;
+      let spec_start_pos = Lexing.lexeme_end_p lexbuf in
 
-      let spec_start_pos = !spec_start_pos in
-
-      push ();
       comment lexbuf;
       let s = Buffer.contents buf in
       Buffer.clear buf;
       let spec_end_pos = Lexing.lexeme_end_p lexbuf in
       Queue.push (Spec (spec_start_pos, spec_end_pos, s)) queue
     }
-  | ("do" blank*) as k
+  | "do" as k
     {
+      Printf.eprintf ("Lexer do [%s]\n") (Lexing.lexeme lexbuf);
       Buffer.add_string buf k;
-      push ()
+
+      loop start_pos lexbuf
     }
-  | _ as c { Buffer.add_char buf c; loop start_pos lexbuf }
+  | _ as c {
+      Printf.eprintf ("Lexer c [%s]\n") (Lexing.lexeme lexbuf);
+             Buffer.add_char buf c; loop start_pos lexbuf }
   | eof { failwith "Error" }
 
-and directive ppf = parse
+  and directive ppf = parse
   | ( [' ' '\t']*
       (['0'-'9']+ as line)
       [' ' '\t']*

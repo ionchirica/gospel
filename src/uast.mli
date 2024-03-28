@@ -326,6 +326,11 @@ and s_module_type_declaration = {
   mtdloc : Location.t;
 }
 
+and iter_attr = { iter_spec : (term * term * term);
+                  iter_text : string;
+                  iter_loc : Location.t
+                }
+
 and s_expression = {
   spexp_desc : s_expression_desc;
   spexp_loc : Location.t;
@@ -362,8 +367,8 @@ and s_expression_desc =
      - "fun P1 P2 .. Pn -> E1" is represented as nested Pexp_fun.
      - "let f P = E" is represented using Pexp_fun.
   *)
-  | Sexp_apply of s_expression * (arg_label * s_expression) list
-  (* E0 ~l1:E1 ... ~ln:En
+  | Sexp_apply of s_expression * (arg_label * s_expression) list * (iter_attr option)
+  (* e0 ~l1:e1 ... ~ln:en
      li can be empty (non labeled argument) or start with '?'
      (optional argument).
 

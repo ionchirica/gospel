@@ -193,6 +193,7 @@ let ghost_spec_str ~filename attr =
         Str_ghost_val { val_ with vspec }
       else Str_ghost_val val_
   | [ { pstr_desc = Pstr_open od; _ } ] -> Str_ghost_open od
+  | [ { pstr_desc = Pstr_eval _; _ } ] -> assert false;
   | _ -> assert false
 
 let floating_spec_str ~filename a =
@@ -356,7 +357,13 @@ and s_expression ~filename expr =
         let expr_body = s_expression expr_body in
         Sexp_fun (arg, expr_arg, pat, expr_body, fun_spec)
     | Pexp_apply (expr, arg_list) ->
-        Sexp_apply (s_expression expr, List.map lbl_expr arg_list)
+        Printf.eprintf "Antes\n";
+        let spec, _ = get_spec_attr attributes in
+        let iter =
+          Option.map (parse_gospel ~filename Uparser.iter_attr) spec
+          |> Option.map snd
+        in
+        Sexp_apply (s_expression expr, List.map lbl_expr arg_list, iter)
     | Pexp_match (expr, case_list) ->
         Sexp_match (s_expression expr, List.map case case_list)
     | Pexp_try (expr, case_list) ->

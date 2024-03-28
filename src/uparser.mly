@@ -86,7 +86,8 @@
 %token AXIOM LEMMA
 %token EPHEMERAL ELSE EXISTS FALSE FORALL FUNCTION FUN
 %token REC
-%token INVARIANT
+%token INVARIANT ITER
+
 %token COERCION
 %token IF IN
 %token OLD NOT RAISES
@@ -140,6 +141,7 @@
 %start <Uast.type_spec> type_spec
 %start <Uast.fun_spec> func_spec
 %start <Uast.loop_spec> loop_spec
+%start <Uast.iter_attr> iter_attr
 %start <Uast.prop> prop
 %start <Uast.ind_decl> ind_decl
 %start <Uast.s_with_constraint list> with_constraint
@@ -155,6 +157,12 @@ axiom:
 | AXIOM id=lident COLON t=term EOF
   { {ax_name = id; ax_term = t; ax_loc = mk_loc $loc; ax_text = ""} }
 ;
+
+iter_attr:
+| ITER f = term_arg c = term_arg i = term_arg EOF
+                                      { { iter_spec = (f, c, i);
+                                          iter_text = "iter_attribute";
+                                          iter_loc = mk_loc $loc } };
 
 prop:
 | AXIOM id=lident COLON t=term EOF
