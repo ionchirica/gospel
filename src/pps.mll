@@ -369,7 +369,9 @@ and gospel ppf start_pos = parse
       let s = Buffer.contents buf in
       Buffer.clear buf;
       let end_pos = Lexing.lexeme_end_p lexbuf in
-      Queue.push (Ghost (start_pos, end_pos, s)) queue;
+      match k with
+      | "iter" ->  Queue.push (Spec (start_pos, end_pos, s)) queue;
+      | _ -> Queue.push (Ghost (start_pos, end_pos, s)) queue;
       scan ppf lexbuf
     }
   | "" {

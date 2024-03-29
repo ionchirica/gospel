@@ -326,17 +326,17 @@ and s_module_type_declaration = {
   mtdloc : Location.t;
 }
 
-and iter_attr = { iter_spec : (term * term * term);
-                  iter_text : string;
-                  iter_loc : Location.t
-                }
-
 and s_expression = {
   spexp_desc : s_expression_desc;
   spexp_loc : Location.t;
   spexp_loc_stack : Location.t list;
   spexp_attributes : attributes; (* ... [@id1] [@id2] *)
 }
+
+and iter_attr = { iter_spec : (s_expression * s_expression * term);
+                  iter_text : string;
+                  iter_loc : Location.t
+                }
 
 and s_expression_desc =
   | Sexp_ident of Longident.t loc

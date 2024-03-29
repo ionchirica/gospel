@@ -159,10 +159,20 @@ axiom:
 ;
 
 iter_attr:
-| ITER f = term_arg c = term_arg i = term_arg EOF
-                                      { { iter_spec = (f, c, i);
-                                          iter_text = "iter_attribute";
-                                          iter_loc = mk_loc $loc } };
+| ITER lident lident i = term EOF
+  {
+    let mk_sexp desc loc = {spexp_desc = desc ;
+                            spexp_loc = loc;
+                            spexp_loc_stack = [];
+                            spexp_attributes = []} in
+    (* TODO !!!! *)
+    let f = Sexp_ident {txt = Lident "f"; loc = mk_loc $loc } in
+    let c = Sexp_ident {txt = Lident "c"; loc = mk_loc $loc } in
+    let f = mk_sexp f (mk_loc $loc) in
+    let c = mk_sexp c (mk_loc $loc) in
+    { iter_spec = (f, c, i);
+        iter_text = "iter_attribute";
+        iter_loc = mk_loc $loc } };
 
 prop:
 | AXIOM id=lident COLON t=term EOF

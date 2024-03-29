@@ -357,7 +357,6 @@ and s_expression ~filename expr =
         let expr_body = s_expression expr_body in
         Sexp_fun (arg, expr_arg, pat, expr_body, fun_spec)
     | Pexp_apply (expr, arg_list) ->
-        Printf.eprintf "Antes\n";
         let spec, _ = get_spec_attr attributes in
         let iter =
           Option.map (parse_gospel ~filename Uparser.iter_attr) spec
