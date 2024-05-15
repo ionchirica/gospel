@@ -964,6 +964,7 @@ let empty_spec preid ret args =
     sp_pure = false;
     sp_equiv = [];
     sp_text = "";
+    sp_iter = None;
     sp_loc = Location.none;
   }
 

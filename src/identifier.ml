@@ -22,6 +22,8 @@ module Preid = struct
     { pid_str = str; pid_attrs = attrs; pid_loc = loc }
 
   let add_attr t attr = { t with pid_attrs = attr :: t.pid_attrs }
+
+  let get_str t = t.pid_str
 end
 
 module Ident = struct

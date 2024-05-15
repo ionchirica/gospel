@@ -58,7 +58,8 @@
         "and", ANDKW;
         (* "mod", OP3("mod"); *)
         "when", WHEN;
-        "iter", ITER
+        "folds", FOLD;
+        "iters", ITER
       ]
 
   (* to translate escape sequences *)

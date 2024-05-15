@@ -24,6 +24,7 @@
     | Documentation of Lexing.position * Lexing.position * string
     | LoopHead of Lexing.position * Lexing.position * string
     | LoopTest of Lexing.position * Lexing.position * string
+    | Iteration of Lexing.position * Lexing.position * string
     | Empty_documentation of Lexing.position
     | Other of string
     | Spaces of space_kind * string
@@ -61,9 +62,9 @@
      # linenb
                  ]...
   *)
-  let print_gospel (lvl : [ `TwoAt | `ThreeAt ]) start_p end_p s ppf =
+  let print_gospel (lvl : [ `OneAt | `TwoAt | `ThreeAt ]) start_p end_p s ppf =
     Fmt.pf ppf "[%sgospel%t {|%s|}%t]"
-      (match lvl with `TwoAt -> "@@" | `ThreeAt -> "@@@")
+      (match lvl with `OneAt  -> "@" | `TwoAt -> "@@" | `ThreeAt -> "@@@")
       (print_directive `Open start_p)
       s
       (print_directive `Close end_p)
@@ -187,6 +188,9 @@
         print ppf l
     | Ghost (start_p, end_p, g) :: l ->
         print_gospel `ThreeAt start_p end_p g ppf;
+        print ppf l
+    | Iteration (start_p, end_p, s) :: l ->
+        print_gospel `OneAt start_p end_p s ppf;
         print ppf l
     | Spec (start_p, end_p, s) :: l ->
         (* FIXME: we could fail right here *)
@@ -362,16 +366,17 @@ and gospel ppf start_pos = parse
       Lexing.new_line lexbuf;
       gospel ppf start_pos lexbuf
     }
-  | ("function" | "type" | "predicate" | "axiom" |
-     "val" | "open" | "lemma" | "inductive" | "iter" ) as k {
+  | (("function" | "type" | "predicate" | "axiom" |
+     "val" | "open" | "lemma" | "inductive" | "iters" | "folds") blank) as k {
       Buffer.add_string buf k;
       comment lexbuf;
       let s = Buffer.contents buf in
       Buffer.clear buf;
       let end_pos = Lexing.lexeme_end_p lexbuf in
-      match k with
-      | "iter" ->  Queue.push (Spec (start_pos, end_pos, s)) queue;
-      | _ -> Queue.push (Ghost (start_pos, end_pos, s)) queue;
+      (match (String.starts_with ~prefix:"iters" k, String.starts_with ~prefix:"folds" k) with
+      | (true, false) ->  Queue.push (Iteration (start_pos, end_pos, s)) queue;
+      | (false, true) ->  Queue.push (Iteration (start_pos, end_pos, s)) queue;
+      | _ -> Queue.push (Ghost (start_pos, end_pos, s)) queue;);
       scan ppf lexbuf
     }
   | "" {

@@ -55,3 +55,37 @@ module Hstr = Hashtbl.Make (struct
 
   let hash = Hashtbl.hash
 end)
+
+module Iteration = struct
+  let args = Hstr.create 16
+
+  let populate_map l =
+    List.iter (fun (x, y) -> match x with | Some x -> Hstr.add args x y | None -> ()) l
+
+  let get_term a =
+    let x =
+      try Hstr.find args a
+      with Not_found ->
+        let err = Printf.sprintf "Missing %s argument" a in
+        failwith err
+    in
+    match (x: Uast.iter_arg_type) with
+    | Term x -> x
+    | Pty _ -> failwith "Not a term"
+
+  let get_pty a =
+    let x =
+      try Hstr.find args a
+      with Not_found ->
+        let err = Printf.sprintf "Missing %s argument" a in
+        failwith err
+    in
+    match (x: Uast.iter_arg_type) with
+    | Pty y -> y
+    | Term _ -> failwith "Not a Pty"
+
+
+  let get_term_opt a =
+    Hstr.find_opt args a
+
+end

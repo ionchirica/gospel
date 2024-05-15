@@ -16,3 +16,9 @@ val structure :
   filename:string -> Ppxlib.Parsetree.structure -> Uast.s_structure
 (** Parses the specifications contained in the attributes of the input OCaml
     structure and returns an annotated OCaml AST with Gospel specifications. *)
+
+
+open Uast
+open Ppxlib
+
+val s_expression: filename:string -> expression -> s_expression

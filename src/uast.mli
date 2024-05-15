@@ -105,7 +105,18 @@ type val_spec = {
   sp_equiv : string list;
   sp_text : string;
   sp_loc : Location.t;
+  sp_iter: iter_attr option;
 }
+and iter_arg_type =
+  | Term of term
+  | Pty of pty
+and iter_attr = {
+  (* (name, value) argument list *)
+  iter_args : (string option * iter_arg_type) list;
+  is_fold : bool;
+  iter_loc : Location.t
+}
+
 
 type field = {
   f_loc : Location.t;
@@ -333,10 +344,18 @@ and s_expression = {
   spexp_attributes : attributes; (* ... [@id1] [@id2] *)
 }
 
-and iter_attr = { iter_spec : (s_expression * s_expression * term);
-                  iter_text : string;
-                  iter_loc : Location.t
-                }
+(* and iter_args = { arg_name : Preid.t; arg_value : s_expression } *)
+(* and iter_attr = { iter_spec : (s_expression *)
+(*                                (\* None -> copy anon fun from expression *\) *)
+(*                                * s_expression option *)
+(*                                * s_expression option *)
+(*                                * s_expression option *)
+(*                                * term); *)
+(*                   iter_text : string; *)
+(*                   _is_fold : bool; *)
+(*                   _iter_loc : Location.t *)
+(*                 } *)
+
 
 and s_expression_desc =
   | Sexp_ident of Longident.t loc

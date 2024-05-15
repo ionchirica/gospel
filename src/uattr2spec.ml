@@ -11,7 +11,6 @@
 module W = Warnings
 open Ppxlib
 open Uast
-
 let is_spec attr = attr.attr_name.txt = "gospel"
 
 let rec get_spec_attr = function
@@ -239,7 +238,17 @@ let with_constraint c =
   | Pwith_modtypesubst (l1, l2) -> Wmodtypesubst (l1, l2)
 
 let rec signature_item_desc ~filename = function
-  | Psig_value v -> Sig_val (val_description ~filename v)
+  | Psig_value v ->
+     (* let spec, _ = get_spec_attr v.pval_attributes in *)
+     (* let iter = *)
+     (*   Option.map (parse_gospel ~filename Uparser.val_spec) spec *)
+     (*   |> Option.map snd *)
+     (* in *)
+     (* let _iter = match iter with *)
+     (*   | Some v -> v.sp_iter *)
+     (*   | None -> None in *)
+
+     Sig_val (val_description ~filename v)
   | Psig_type (r, tl) -> Sig_type (r, List.map (type_declaration ~filename) tl)
   | Psig_attribute a ->
       if not (is_spec a) then Sig_attribute a else floating_spec ~filename a
@@ -359,7 +368,7 @@ and s_expression ~filename expr =
     | Pexp_apply (expr, arg_list) ->
         let spec, _ = get_spec_attr attributes in
         let iter =
-          Option.map (parse_gospel ~filename Uparser.iter_attr) spec
+          Option.map (parse_gospel ~filename Uparser.iter_spec) spec
           |> Option.map snd
         in
         Sexp_apply (s_expression expr, List.map lbl_expr arg_list, iter)

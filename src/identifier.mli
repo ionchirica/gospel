@@ -32,6 +32,8 @@ module Preid : sig
 
   val add_attr : t -> string -> t
   (** [add_attr t attr] is [t] with [attr] added to the list of its attributes. *)
+
+  val get_str : t -> string
 end
 
 (** {1 Identifiers}
