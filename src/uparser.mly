@@ -164,63 +164,6 @@ axiom:
   { {ax_name = id; ax_term = t; ax_loc = mk_loc $loc; ax_text = ""} }
 ;
 
-(* iter_attr: *)
-(* | ITER t=iter_arg f=iter_arg c=iter_arg i=term EOF *)
-(* (\* iter <type> <fun_name> <collection> <inv> *\) *)
-(*   { *)
-(*     let mk_sexp desc loc = {spexp_desc = desc ; *)
-(*                             spexp_loc = loc; *)
-(*                             spexp_loc_stack = []; *)
-(*                             spexp_attributes = []} in *)
-(*     let t = Sexp_ident {txt = t; loc = mk_loc $loc } in *)
-(*     let f = Sexp_ident {txt = f; loc = mk_loc $loc } in *)
-(*     let c = Sexp_ident {txt = c; loc = mk_loc $loc } in *)
-(*     let t = mk_sexp t (mk_loc $loc) in *)
-(*     let f = mk_sexp f (mk_loc $loc) in *)
-(*     let c = mk_sexp c (mk_loc $loc) in *)
-(*     { iter_spec = (t, Some f, Some c, None, i); *)
-(*       iter_text = "iter_attribute"; *)
-(*       is_fold = false; *)
-(*       iter_loc = mk_loc $loc } } *)
-(* | ITER t=iter_arg FUN i=term EOF *)
-(* (\* iter <type> <anon_fun> <inv> *\) *)
-(*   { *)
-(*     let mk_sexp desc loc = {spexp_desc = desc ; *)
-(*                             spexp_loc = loc; *)
-(*                             spexp_loc_stack = []; *)
-(*                             spexp_attributes = []} in *)
-(*     let t = Sexp_ident {txt = t; loc = mk_loc $loc } in *)
-(*     let t = mk_sexp t (mk_loc $loc) in *)
-(*     { iter_spec = (t, None, None, None, i); *)
-(*       iter_text = "iter_attribute"; *)
-(*       is_fold = false; *)
-(*       iter_loc = mk_loc $loc } } *)
-(* | FOLD t=iter_arg FUN a=iter_arg c=iter_arg i=term EOF *)
-(*   { *)
-(*     let mk_sexp desc loc = {spexp_desc = desc ; *)
-(*                             spexp_loc = loc; *)
-(*                             spexp_loc_stack = []; *)
-(*                             spexp_attributes = []} in *)
-(*     let t = Sexp_ident {txt = t; loc = mk_loc $loc } in *)
-(*     let a = Sexp_ident {txt = a; loc = mk_loc $loc } in *)
-(*     let c = Sexp_ident {txt = c; loc = mk_loc $loc } in *)
-(*     let t = mk_sexp t (mk_loc $loc) in *)
-(*     let a = mk_sexp a (mk_loc $loc) in *)
-(*     let c = mk_sexp c (mk_loc $loc) in *)
-(*     { iter_spec = (t, None, Some c, Some a, i); *)
-(*       iter_text = "fold_attribute"; *)
-(*       _is_fold = true; *)
-(*       _iter_loc = mk_loc $loc } } *)
-
-(* iter_fun: *)
-(*   (\* check this lident -> placeholder *\) *)
-(* | FUN { None } *)
-(* | lident { *)
-(*   let id = Lident (Preid.get_str $1) in *)
-(*   let id = Sexp_ident { txt = id; loc = mk_loc $loc } in *)
-(*   let id = mk_sexp id (mk_loc $loc) in *)
-(*   Some id }; *)
-
 iter_arg:
 | TILDE lident COLON term {
     let name = Preid.get_str $2 in
@@ -360,14 +303,16 @@ iter_spec:
     let tys = Option.value ~default:[] tys in
     { is_fold = false;
       iter_loc = mk_loc $loc;
-      iter_args = args @ tys }
+      iter_args = args @ tys;
+    }
   }
 | FOLD args=iter_arg* tys=iter_spec_ EOF
   {
     let tys = Option.value ~default:[] tys in
     { is_fold = true;
       iter_loc = mk_loc $loc;
-      iter_args = args @ tys }
+      iter_args = args @ tys
+    }
   };
 
 iter_spec_:
