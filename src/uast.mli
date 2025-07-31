@@ -105,18 +105,18 @@ type val_spec = {
   sp_equiv : string list;
   sp_text : string;
   sp_loc : Location.t;
-  sp_iter: iter_attr option;
+  sp_iter : iter_attr option;
 }
-and iter_arg_type =
-  | Term of term
-  | Pty of pty
+
+and iter_arg_type = Term of term | Pty of pty
+and iter_pat_type = Map | Fold | Iter | Filter
+
 and iter_attr = {
   (* (name, value) argument list *)
   iter_args : (string option * iter_arg_type) list;
-  is_fold : bool;
-  iter_loc : Location.t
+  iter_pat : iter_pat_type;
+  iter_loc : Location.t;
 }
-
 
 type field = {
   f_loc : Location.t;
@@ -355,8 +355,6 @@ and s_expression = {
 (*                   _is_fold : bool; *)
 (*                   _iter_loc : Location.t *)
 (*                 } *)
-
-
 and s_expression_desc =
   | Sexp_ident of Longident.t loc
   (* x
@@ -386,7 +384,8 @@ and s_expression_desc =
      - "fun P1 P2 .. Pn -> E1" is represented as nested Pexp_fun.
      - "let f P = E" is represented using Pexp_fun.
   *)
-  | Sexp_apply of s_expression * (arg_label * s_expression) list * (iter_attr option)
+  | Sexp_apply of
+      s_expression * (arg_label * s_expression) list * iter_attr option
   (* e0 ~l1:e1 ... ~ln:en
      li can be empty (non labeled argument) or start with '?'
      (optional argument).

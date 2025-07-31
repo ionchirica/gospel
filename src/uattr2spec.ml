@@ -11,6 +11,7 @@
 module W = Warnings
 open Ppxlib
 open Uast
+
 let is_spec attr = attr.attr_name.txt = "gospel"
 
 let rec get_spec_attr = function
@@ -192,7 +193,7 @@ let ghost_spec_str ~filename attr =
         Str_ghost_val { val_ with vspec }
       else Str_ghost_val val_
   | [ { pstr_desc = Pstr_open od; _ } ] -> Str_ghost_open od
-  | [ { pstr_desc = Pstr_eval _; _ } ] -> assert false;
+  | [ { pstr_desc = Pstr_eval _; _ } ] -> assert false
   | _ -> assert false
 
 let floating_spec_str ~filename a =
@@ -239,16 +240,15 @@ let with_constraint c =
 
 let rec signature_item_desc ~filename = function
   | Psig_value v ->
-     (* let spec, _ = get_spec_attr v.pval_attributes in *)
-     (* let iter = *)
-     (*   Option.map (parse_gospel ~filename Uparser.val_spec) spec *)
-     (*   |> Option.map snd *)
-     (* in *)
-     (* let _iter = match iter with *)
-     (*   | Some v -> v.sp_iter *)
-     (*   | None -> None in *)
-
-     Sig_val (val_description ~filename v)
+      (* let spec, _ = get_spec_attr v.pval_attributes in *)
+      (* let iter = *)
+      (*   Option.map (parse_gospel ~filename Uparser.val_spec) spec *)
+      (*   |> Option.map snd *)
+      (* in *)
+      (* let _iter = match iter with *)
+      (*   | Some v -> v.sp_iter *)
+      (*   | None -> None in *)
+      Sig_val (val_description ~filename v)
   | Psig_type (r, tl) -> Sig_type (r, List.map (type_declaration ~filename) tl)
   | Psig_attribute a ->
       if not (is_spec a) then Sig_attribute a else floating_spec ~filename a

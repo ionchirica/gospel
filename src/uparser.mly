@@ -92,7 +92,7 @@
 %token AXIOM LEMMA
 %token EPHEMERAL ELSE EXISTS FALSE FORALL FUNCTION FUN
 %token REC
-%token INVARIANT ITER FOLD
+%token INVARIANT ITER FOLD MAP FILTER
 
 %token COERCION
 %token IF IN
@@ -301,7 +301,7 @@ iter_spec:
 | ITER args=iter_arg* tys = iter_spec_ EOF
   {
     let tys = Option.value ~default:[] tys in
-    { is_fold = false;
+    { iter_pat = Iter;
       iter_loc = mk_loc $loc;
       iter_args = args @ tys;
     }
@@ -309,11 +309,28 @@ iter_spec:
 | FOLD args=iter_arg* tys=iter_spec_ EOF
   {
     let tys = Option.value ~default:[] tys in
-    { is_fold = true;
+    { iter_pat = Fold;
       iter_loc = mk_loc $loc;
       iter_args = args @ tys
     }
-  };
+  }
+| MAP args=iter_arg* tys=iter_spec_ EOF
+  {
+    let tys = Option.value ~default:[] tys in
+    { iter_pat = Map;
+      iter_loc = mk_loc $loc;
+      iter_args = args @ tys
+    }
+  }
+| FILTER args=iter_arg* tys=iter_spec_ EOF
+  {
+    let tys = Option.value ~default:[] tys in
+    { iter_pat = Filter;
+      iter_loc = mk_loc $loc;
+      iter_args = args @ tys
+    }
+  }
+;
 
 iter_spec_:
 | { None }

@@ -59,7 +59,9 @@
         (* "mod", OP3("mod"); *)
         "when", WHEN;
         "folds", FOLD;
-        "iters", ITER
+        "iters", ITER;
+        "maps", MAP;
+        "filters", FILTER
       ]
 
   (* to translate escape sequences *)

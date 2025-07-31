@@ -367,16 +367,16 @@ and gospel ppf start_pos = parse
       gospel ppf start_pos lexbuf
     }
   | (("function" | "type" | "predicate" | "axiom" |
-     "val" | "open" | "lemma" | "inductive" | "iters" | "folds") blank) as k {
+     "val" | "open" | "lemma" | "inductive" | "iters" | "folds" | "maps" | "filters") blank) as k {
       Buffer.add_string buf k;
       comment lexbuf;
       let s = Buffer.contents buf in
       Buffer.clear buf;
       let end_pos = Lexing.lexeme_end_p lexbuf in
-      (match (String.starts_with ~prefix:"iters" k, String.starts_with ~prefix:"folds" k) with
-      | (true, false) ->  Queue.push (Iteration (start_pos, end_pos, s)) queue;
-      | (false, true) ->  Queue.push (Iteration (start_pos, end_pos, s)) queue;
-      | _ -> Queue.push (Ghost (start_pos, end_pos, s)) queue;);
+      (if (String.starts_with ~prefix:"iters" k || String.starts_with ~prefix:"folds" k ||
+          String.starts_with ~prefix:"maps" k  || String.starts_with ~prefix:"filters" k) then
+       Queue.push (Iteration (start_pos, end_pos, s)) queue
+      else Queue.push (Ghost (start_pos, end_pos, s)) queue);
       scan ppf lexbuf
     }
   | "" {
